@@ -1,7 +1,7 @@
 <?php
 
 class Database {
-    private $host = "mysql.hostinger.ph";
+    private $host = "";
     private $username = "";
     private $password = "";
     private $dbname = "";
