@@ -1,5 +1,18 @@
 <?php header("Access-Control-Allow-Origin: *"); ?>
 <form class="col-xs-12">
+    <?php
+        require_once('api/api.php');
+        
+        $message = post('message');
+        if (!empty($message)) {
+    ?>
+            <div class="alert alert-warning alert-dismissable fade in top-15">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">&times;</a>
+                <p><?php echo $message; ?></p>
+            </div>
+    <?php
+        }
+    ?>
     <div class="row top-7">
         <div class="col-xs-12">
             <input class="form-control" id="email" type="text" placeholder="Email" />

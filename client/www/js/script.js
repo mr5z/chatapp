@@ -134,7 +134,7 @@ $(document).on('click', '#login', function(e) {
                 onLogInSuccess(result.message);
             }
             else {
-                onLogInError();
+                onLogInError(result.message);
             }
         },
         error: function(a, b, c) {
@@ -154,8 +154,8 @@ function onLogInSuccess(user) {
     }
 }
 
-function onLogInError() {
-	
+function onLogInError(message) {
+	loadContent('login.php', { message: message });
 }
 	
 ///
@@ -321,7 +321,7 @@ function startChatEngine() {
             url: 'api/message-updater.php',
             data: {
                 messagesId: messagesId.join(','),
-                recipientId: recipientId,
+                recipientId: getRecipientId(),
                 recipientType: recipientType
             },
             type: 'post',
@@ -457,9 +457,7 @@ function loadAsync(request) {
     request.url = DOMAIN + request.url;
     request.queueId = ++requestIdGenerator;
     request.complete = function() {
-        console.log("BEFORE { queueId: %d, queueSize: %d }", this.queueId, ajaxRequests.length);
         ajaxRequests.splice(this.queueId, 1);
-        console.log("AFTER { queueId: %d, queueSize: %d }", this.queueId, ajaxRequests.length);
     };
     ajaxRequests.push($.ajax(request));
 }
