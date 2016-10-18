@@ -52,7 +52,10 @@ function createRoomResponse($senderId, $roomId, $body) {
         $messageId = $response[RESPONSE_MESSAGE];
         $values = "VALUES";
         while($row = $users->fetch_object()) {
-            $values .= "($roomId, $row->id, $messageId),";
+            $userId = $row->id;
+            if ($userId != $senderId) {
+                $values .= "($roomId, $userId, $messageId),";
+            }
         }
         $values = substr($values, 0, strlen($values) - 1);
         $sql = "INSERT INTO room_messages(roomId, recipientId, messageId) $values";

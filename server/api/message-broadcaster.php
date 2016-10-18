@@ -2,6 +2,7 @@
 
 require_once('api.php');
 
+$userId         = post('userId');
 $recipientId 	= post('recipientId');
 $recipientType 	= post('recipientType');
 
@@ -18,7 +19,8 @@ switch ($recipientType) {
                 INNER JOIN room_messages
                 ON room_messages.messageId = messages.id
                 WHERE room_messages.status = 'pending'
-                AND room_messages.roomId = $recipientId";
+                AND room_messages.roomId = $recipientId
+                AND room_messages.recipientId = $userId";
         break;
 }
 		
