@@ -12,17 +12,6 @@ function post($key) {
     return isset($_POST[$key]) ? $db->real_escape_string($_POST[$key]) : "";
 }
 
-function buildResponse($status, $message = "") {
-    return array(RESPONSE_STATUS => $status, 
-                 RESPONSE_MESSAGE => $message);
-}
-
-function printResponse($response) {
-    header("Content-Type: application/json; charset=utf-8");
-    header("Access-Control-Allow-Origin: *");
-    print json_encode($response);
-}
-
 function toTitleCase($text) {
     return ucwords(strtolower($text));
 }

@@ -6,20 +6,13 @@ require_once('../api/api.php');
 
 $userId = post('userId');
 
-$sql = "SELECT u.firstName AS sender, u.id AS senderId FROM users u
-        INNER JOIN messages m
-        ON m.senderId = u.id
-        WHERE m.status = 'pending'
-        AND m.recipientId = $userId
-        GROUP BY u.id";
+$notifications = getNotificationsByRecipientId($userId, 'user');
 
-$result = query($sql);
-
-if ($result) {
-    if ($result->num_rows > 0) {
+if ($notifications) {
+    if ($notifications->num_rows > 0) {
 ?>
 <?php
-        while($row = $result->fetch_object()) {
+        while($row = $notifications->fetch_object()) {
 ?>
             <a class="row default-rows padding-19 chat" href="#" data-recipient-id="<?php echo $row->senderId; ?>" data-recipient-type="user">
                 <strong><?php echo $row->sender; ?></strong> has sent you a message

@@ -14,14 +14,15 @@ switch ($recipientType) {
                 AND `recipientType` = '$recipientType'";
         break;
     case 'room':
-        $sql = "SELECT messages.*
+        $sql = "SELECT messages.*, room_messages.recipientId RECIPIENT_ID
                 FROM messages
-                INNER JOIN room_messages
+                LEFT JOIN room_messages
                 ON room_messages.messageId = messages.id
                 WHERE room_messages.status = 'pending'
                 AND room_messages.roomId = $recipientId
                 AND room_messages.recipientId = $userId";
         break;
+    default: exitWithResponse("Invalid recipient type");
 }
 		
 $result = query($sql);

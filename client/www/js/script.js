@@ -321,6 +321,7 @@ function startChatEngine() {
             url: 'api/message-updater.php',
             data: {
                 messagesId: messagesId.join(','),
+                userId: getUserId(),
                 recipientId: getRecipientId(),
                 recipientType: recipientType
             },
@@ -360,7 +361,7 @@ function startNotificationEngine() {
         }
         
         loadAsync({
-            url: 'api/user-notification-broadcaster.php',
+            url: 'api/notification-broadcaster.php',
             data: { recipientId: getUserId(), recipientType: recipientType },
             type: 'post',
             success: function(result) {
