@@ -267,45 +267,44 @@ $(document).on('click', '#send-message', function() {
     $('#input-message').val('');
     $('#input-message').focus();
 });
+    
+var isChatEngineStopped = false;
 
 $(document).on('click', '.chat', function() {
     recipientId = $(this).attr('data-recipient-id');
     recipientType = $(this).attr('data-recipient-type');
     loadContent('chat.php', { recipientId: recipientId, recipientType: recipientType });
     loadFooter('pages/footer-chat.php');
-    if (!isChatEngineStarted()) {
+    if (!isChatEngineStopped) {
         startChatEngine();
     }
+    isChatEngineStopped = false;
 });
 
 function startChatEngine() {
-    var busy = false;
-    chatEngineId = setInterval(function() {
-        
-        if (busy) {
-            return;
-        }
-        
-        loadAsync({
-            url: 'api/message-broadcaster.php',
-            data: {
-                userId: getUserId(),
-                recipientId: getRecipientId(),
-                recipientType: recipientType
-            },
-            type: 'post',
-            success: function(result) {
-                if (result.status == 'success') {
-                    onMessagesReceived(result.message);
-                }
-                else {
-                    
-                }
+    
+    if (isChatEngineStopped) {
+        return;
+    }
+    
+    loadAsync({
+        url: 'api/message-broadcaster.php',
+        data: {
+            userId: getUserId(),
+            recipientId: getRecipientId(),
+            recipientType: recipientType
+        },
+        type: 'post',
+        success: function(result) {
+            if (result.status == 'success') {
+                onMessagesReceived(result.message);
             }
-        });
-        
-    }, MESSAGE_RECEIVING_INTERVAL);
-
+            else {
+                setTimeout(startChatEngine, MESSAGE_RECEIVING_INTERVAL);
+            }
+        }
+    });
+    
     function onMessagesReceived(messages) {
         busy = true;
         var messagesId = [];
@@ -327,8 +326,13 @@ function startChatEngine() {
             },
             type: 'post',
             success: function(result) {
-                if (result.status == 'success') {
-                    busy = false;
+                setTimeout(startChatEngine, MESSAGE_RECEIVING_INTERVAL);
+                switch(result.status) {
+                    case 'success':
+                        break;
+                    case 'error':
+                        console.log('error updating message: %s', result.message);
+                        break;
                 }
             }
         });
@@ -336,12 +340,7 @@ function startChatEngine() {
 }
 
 function stopChatEngine() {
-    clearInterval(chatEngineId);
-    chatEngineId = -1;
-}
-
-function isChatEngineStarted() {
-    return chatEngineId != -1;
+    isChatEngineStopped = true;
 }
 
 ///
@@ -362,7 +361,7 @@ function startNotificationEngine() {
         
         loadAsync({
             url: 'api/notification-broadcaster.php',
-            data: { recipientId: getUserId(), recipientType: recipientType },
+            data: { recipientId: getUserId(), recipientType: 'user' },
             type: 'post',
             success: function(result) {
                 updateUserStatus();

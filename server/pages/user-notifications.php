@@ -6,7 +6,7 @@ require_once('../api/api.php');
 
 $userId = post('userId');
 
-$notifications = getNotificationsByRecipientId($userId, 'user');
+$notifications = getNotificationsByRecipient($userId, 'user');
 
 if ($notifications) {
     if ($notifications->num_rows > 0) {

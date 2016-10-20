@@ -9,7 +9,10 @@ $recipientType  = post('recipientType');
 
 switch ($recipientType) {
     case 'user':
-        $sql = "UPDATE `messages` SET `status` = 'received', `dateReceived` = NOW(3) WHERE id IN($messagesId)";
+        $sql = "UPDATE `messages`
+                SET `status` = 'received',
+                    `dateReceived` = NOW(3)
+                WHERE id IN($messagesId)";
         break;
     case 'room':
         $sql = "UPDATE `room_messages`
@@ -23,7 +26,12 @@ switch ($recipientType) {
 $result = query($sql);
 
 if ($result) {
-    $response = buildResponse(STATUS_SUCCESS, "messagesId: [$messagesId], recipientId: $recipientId, recipientType: $recipientType");
+    if (getAffectedRows() > 0) {
+        $response = buildResponse(STATUS_SUCCESS);
+    }
+    else {
+        $response = buildResponse(STATUS_ERROR, "No rows affected");
+    }
 }
 else {
     $response = buildResponse(STATUS_ERROR, getDbError());

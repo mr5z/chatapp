@@ -3,8 +3,10 @@
 require_once('database.php');
 require_once('utils.php');
 
-$db = new Database();
-$db = $db->connect();
+$db = (new Database())->connect();
+
+// Update user status every time this is called
+updateUsersStatus();
 
 function query($sql) {
     global $db;
@@ -50,7 +52,7 @@ function getUsersByRoomId($roomId) {
     return query($sql);
 }
 
-function getNotificationsByRecipientId($recipientId, $recipientType) {
+function getNotificationsByRecipient($recipientId, $recipientType) {
     $sql = "SELECT u.firstName AS sender, u.id AS senderId FROM users u
             INNER JOIN messages m
             ON m.senderId = u.id
@@ -71,6 +73,11 @@ function getLastInsertId() {
     return $db->insert_id;
 }
 
+function getAffectedRows() {
+    global $db;
+    return $db->affected_rows;
+}
+
 function buildResponse($status, $message = "") {
     return array(RESPONSE_STATUS => $status, 
                  RESPONSE_MESSAGE => $message);
@@ -87,7 +94,5 @@ function exitWithResponse($message = "") {
     printResponse($response);
     exit();
 }
-
-updateUsersStatus();
 
 ?>
