@@ -14,7 +14,7 @@ switch ($recipientType) {
                 AND `recipientType` = '$recipientType'";
         break;
     case 'room':
-        $sql = "SELECT messages.*, room_messages.recipientId RECIPIENT_ID
+        $sql = "SELECT messages.*
                 FROM messages
                 LEFT JOIN room_messages
                 ON room_messages.messageId = messages.id
