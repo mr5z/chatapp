@@ -38,7 +38,6 @@ function showLoadingScreen() {
 function configCredentials(user) {
     setLoggedIn(true);
     setUserId(user.id);
-    recipientType = 'user';
 }
 
 function loadEngines() {
@@ -288,14 +287,21 @@ function startChatEngine() {
         return;
     }
     
+    console.log('userId: %s, recipientId: %s, recipientType: %s',
+            getUserId(),
+            getRecipientId(),
+            recipientType);
+    
     loadAsync({
         url: 'api/message-broadcaster.php',
+        type: 'post',
         data: {
             userId: getUserId(),
             recipientId: getRecipientId(),
             recipientType: recipientType
         },
-        type: 'post',
+        beforeSend: function() {
+        },
         success: function(result) {
             if (result.status == 'success') {
                 onMessagesReceived(result.message);
@@ -362,7 +368,7 @@ function startNotificationEngine() {
         
         loadAsync({
             url: 'api/notification-broadcaster.php',
-            data: { recipientId: getUserId(), recipientType: recipientType },
+            data: { recipientId: getUserId(), recipientType: 'user' },
             type: 'post',
             success: function(result) {
                 updateUserStatus();

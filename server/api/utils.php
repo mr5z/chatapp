@@ -12,6 +12,10 @@ function post($key) {
     return isset($_POST[$key]) ? $db->real_escape_string($_POST[$key]) : "";
 }
 
+function getRequestMethod() {
+    return $_SERVER['REQUEST_METHOD'];
+}
+
 function toTitleCase($text) {
     return ucwords(strtolower($text));
 }

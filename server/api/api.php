@@ -3,6 +3,10 @@
 require_once('database.php');
 require_once('utils.php');
 
+if (getRequestMethod() != 'POST') {
+    exitWithResponse("Request method not allowed");
+}
+
 $db = (new Database())->connect();
 
 // Update user status every time this is called
