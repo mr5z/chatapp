@@ -38,6 +38,7 @@ function showLoadingScreen() {
 function configCredentials(user) {
     setLoggedIn(true);
     setUserId(user.id);
+    recipientType = 'user';
 }
 
 function loadEngines() {
@@ -361,7 +362,7 @@ function startNotificationEngine() {
         
         loadAsync({
             url: 'api/notification-broadcaster.php',
-            data: { recipientId: getUserId(), recipientType: 'user' },
+            data: { recipientId: getUserId(), recipientType: recipientType },
             type: 'post',
             success: function(result) {
                 updateUserStatus();
