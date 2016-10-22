@@ -35,7 +35,7 @@ function setUserAsActive($userId) {
 function updateUsersStatus() {
     $sql = "UPDATE users
             SET users.active = FALSE
-            WHERE users.lastSeenActive <= NOW() - INTERVAL 3 SECOND";
+            WHERE users.lastSeenActive <= NOW() - INTERVAL 7 SECOND";
     $result = query($sql);
     if ($result) {
         // we don't care about the result
@@ -64,6 +64,25 @@ function getNotificationsByRecipient($recipientId, $recipientType) {
             AND m.recipientId = $recipientId
             AND m.recipientType = '$recipientType'
             GROUP BY u.id";
+    return query($sql);
+}
+
+function getRoomsByUserId($userId) {
+    $sql = "SELECT
+                rooms.id,
+                rooms.name,
+                t1.activeUsers,
+                t1.totalUsers
+            FROM room_members 
+            INNER JOIN rooms ON room_members.roomId = rooms.id
+            INNER JOIN users ON room_members.userId = users.id
+            INNER JOIN (  
+                SELECT roomId, SUM(users.active) AS activeUsers, COUNT(users.id) AS totalUsers
+                FROM users 
+                INNER JOIN room_members ON users.id = room_members.userId
+                GROUP BY roomId
+            ) t1 ON t1.roomID = rooms.id
+            WHERE room_members.userId = $userId";
     return query($sql);
 }
 

@@ -1,4 +1,7 @@
-<?php header("Access-Control-Allow-Origin: *"); ?>
+<?php
+header("Access-Control-Allow-Origin: *");
+require_once('api/api.php');
+?>
 <form class="col-xs-12">
     <div class="row top-7">
         <div class="col-xs-12">

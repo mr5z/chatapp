@@ -1,8 +1,9 @@
-<?php header("Access-Control-Allow-Origin: *"); ?>
+<?php
+header("Access-Control-Allow-Origin: *");
+require_once('api/api.php');
+?>
 <div class="col-xs-12 col-md-12 top-15">
 <?php
-
-require_once('api/api.php');
 
 $userId = post('userId');
 

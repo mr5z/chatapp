@@ -5,8 +5,8 @@
 var DOMAIN = 'http://lbchatapp.hol.es/';
 var MESSAGE_RECEIVING_INTERVAL = 500;
 var NOTIFICATION_RECEIVING_INTERVAL = 2000;
-var chatEngineId = -1;
-var notificationEngineId = -1;
+var isChatEngineStopped = true;
+var isNotificationEngineStopped = true;
 var recipientType = '';
 var recipientId = -1;
 var userTypes = {
@@ -14,7 +14,6 @@ var userTypes = {
     other: 'other',
     room: 'room'
 };
-// var dummyMessageId
 
 function showHomePage(user) {
     loadContent('home.php', { userId: user.id });
@@ -23,6 +22,7 @@ function showHomePage(user) {
 
 function showLoadingScreen() {
     var loadingScreen = document.createElement('div');
+    var size = $(document).width() / 4 + 'px';
     $(loadingScreen).css({
         width: "100%",
         height: "100%",
@@ -30,7 +30,7 @@ function showLoadingScreen() {
         backgroundImage: "url('img/loading-screen.gif')",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
-        backgroundSize: "120px 120px"
+        backgroundSize: size + ' ' + size
     });
     $('#content *').replaceWith(loadingScreen);
 }
@@ -41,7 +41,8 @@ function configCredentials(user) {
 }
 
 function loadEngines() {
-    if (!isNotificationEngineStarted()) {
+    if (isNotificationEngineStopped) {
+        isNotificationEngineStopped = false;
         startNotificationEngine();
     }
 }
@@ -267,18 +268,16 @@ $(document).on('click', '#send-message', function() {
     $('#input-message').val('');
     $('#input-message').focus();
 });
-    
-var isChatEngineStopped = false;
 
 $(document).on('click', '.chat', function() {
-    recipientId = $(this).attr('data-recipient-id');
+    recipientId = parseInt($(this).attr('data-recipient-id'));
     recipientType = $(this).attr('data-recipient-type');
     loadContent('chat.php', { recipientId: recipientId, recipientType: recipientType });
     loadFooter('pages/footer-chat.php');
-    if (!isChatEngineStopped) {
+    if (isChatEngineStopped) {
+        isChatEngineStopped = false;
         startChatEngine();
     }
-    isChatEngineStopped = false;
 });
 
 function startChatEngine() {
@@ -287,7 +286,7 @@ function startChatEngine() {
         return;
     }
     
-    console.log('userId: %s, recipientId: %s, recipientType: %s',
+    console.log('userId: %d, recipientId: %d, recipientType: %s',
             getUserId(),
             getRecipientId(),
             recipientType);
@@ -355,73 +354,67 @@ function stopChatEngine() {
 ///
 
 $(document).on('click', '#notification-button', function() {
+    stopChatEngine();
     loadContent('pages/user-notifications.php', { userId: getUserId() });
 });
 
 function startNotificationEngine() {
-    var busy = false;
-    notificationEngineId = setInterval(function() {
-        
-        if (busy) {
-            return;
+    
+    if (isNotificationEngineStopped) {
+        return;
+    }
+    
+    loadAsync({
+        url: 'api/notification-broadcaster.php',
+        data: { recipientId: getUserId(), recipientType: 'user' },
+        type: 'post',
+        success: function(result) {
+            setTimeout(startNotificationEngine, NOTIFICATION_RECEIVING_INTERVAL);
+            updateUserStatus();
+            if (result.status == 'success') {
+                onNotificationReceived(result.message);
+            }
+            else {
+                onEmptyNotifications();
+            }
+        },
+        error: function() {
+            setTimeout(startNotificationEngine, NOTIFICATION_RECEIVING_INTERVAL);
         }
-        
-        loadAsync({
-            url: 'api/notification-broadcaster.php',
-            data: { recipientId: getUserId(), recipientType: 'user' },
-            type: 'post',
-            success: function(result) {
-                updateUserStatus();
-                if (result.status == 'success') {
-                    onNotificationReceived(result.message);
-                }
-                else {
-                    onEmptyNotifications();
-                }
-            },
-            complete: function() {
-                busy = false;
-            }
-        });
-    }, NOTIFICATION_RECEIVING_INTERVAL);
-
-    function onNotificationReceived(notifications) {
-        $('#notification-bubble').show();
-        $('#notification-bubble').text(notifications.length);
-    }
-
-    function onEmptyNotifications() {
-        $('#notification-bubble').hide();
-        $('#notification-bubble').text('');
-    }
-
-    function updateUserStatus() {
-        loadAsync({
-            url: 'api/update-user-status.php',
-            data: { userId: getUserId() },
-            type: 'post',
-            success: function(result) {
-                // since it's just an update of user's status
-                // we will ignore the result and continue on with our life
-                if (result.status == 'success') {
-                    // console.log('updating user status success');
-                }
-                else {
-                    // console.log('updating user status failed: %s', result.message);
-                }
-            }
-        });
-    }
+    });
 	
 }
 
-function stopNotificationEngine() {
-    clearInterval(notificationEngineId);
-    notificationEngineId = -1;
+function onNotificationReceived(notifications) {
+    $('#notification-bubble').show();
+    $('#notification-bubble').text(notifications.length);
 }
 
-function isNotificationEngineStarted() {
-    return notificationEngineId != -1;
+function onEmptyNotifications() {
+    $('#notification-bubble').hide();
+    $('#notification-bubble').text('');
+}
+
+function stopNotificationEngine() {
+    isNotificationEngineStopped = true;
+}
+
+function updateUserStatus() {
+    loadAsync({
+        url: 'api/update-user-status.php',
+        data: { userId: getUserId() },
+        type: 'post',
+        success: function(result) {
+            // since it's just an update of user's status
+            // we will ignore the result and continue on with our life
+            if (result.status == 'success') {
+                // console.log('updating user status success');
+            }
+            else {
+                // console.log('updating user status failed: %s', result.message);
+            }
+        }
+    });
 }
 
 ///
@@ -536,7 +529,7 @@ function setLoggedIn(loggedIn) {
 }
 
 function getUserId() {
-    return localStorage.getItem('userId');
+    return parseInt(localStorage.getItem('userId'));
 }
 
 function setUserId(userId) {
