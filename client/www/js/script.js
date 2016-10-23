@@ -2,11 +2,12 @@
 
 // var DOMAIN = '';
 // var DOMAIN = 'http://lbchatapp.esy.es/';
-var DOMAIN = 'http://lbchatapp.hol.es/';
+// var DOMAIN = 'http://lbchatapp.hol.es/';
+var DOMAIN = 'http://locationbasedapp.esy.es/';
 var MESSAGE_RECEIVING_INTERVAL = 500;
 var NOTIFICATION_RECEIVING_INTERVAL = 2000;
-var isChatEngineStopped = true;
-var isNotificationEngineStopped = true;
+var isChatEngineStopped = false;
+var isNotificationEngineStopped = false;
 var recipientType = '';
 var recipientId = -1;
 var userTypes = {
