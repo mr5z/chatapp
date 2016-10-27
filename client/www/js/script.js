@@ -6,8 +6,9 @@
 var DOMAIN = 'http://locationbasedapp.esy.es/';
 var MESSAGE_RECEIVING_INTERVAL = 500;
 var NOTIFICATION_RECEIVING_INTERVAL = 2000;
-var isChatEngineStopped = false;
-var isNotificationEngineStopped = false;
+var DEBUG = true;
+var isChatEngineStopped = DEBUG;
+var isNotificationEngineStopped = DEBUG;
 var recipientType = '';
 var recipientId = -1;
 var userTypes = {
@@ -242,7 +243,8 @@ function popNewDialog(source, message) {
         messageWrapper.className += "pull-left text-left";
         break;
     }
-    var formattedDate = moment(message.dateSent).format('h:mm:ss A MM/DD/YY');
+    // var formattedDate = moment(message.dateSent).format('h:mm:ss A MM/DD/YY');
+    var formattedDate = moment(message.dateSent).fromNow();
     var timeStamp = moment(message.dateSent).format('YYYY-MM-DD hh:mm:ss');
     $(messageBody).append(document.createTextNode(message.body));
     $(dateSent).append(document.createTextNode(formattedDate));
@@ -441,6 +443,32 @@ $(document).on('click', '.add-contacts', function() {
             }
         }
     });
+});
+
+///
+/// Room functions
+///
+var options = [];
+
+$(document).on('click', '.dropdown-menu a', function(event) {
+    var $target = $(event.currentTarget),
+       val = $target.attr('data-value'),
+       $inp = $target.find('input'),
+       idx;
+
+    if (( idx = options.indexOf( val )) > -1 ) {
+        options.splice( idx, 1 );
+        setTimeout(function() { $inp.prop( 'checked', false) }, 0);
+    }
+    else {
+        options.push( val );
+        setTimeout(function() { $inp.prop( 'checked', true) }, 0);
+    }
+
+    $(event.target).blur();
+      
+    console.log(options);
+    return false;
 });
 
 ///
