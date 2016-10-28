@@ -86,6 +86,14 @@ function getRoomsByUserId($userId) {
     return query($sql);
 }
 
+function getContactListByUserId($userId) {
+    $sql = "SELECT users.* FROM contacts
+            INNER JOIN users
+            ON contacts.contactId = users.id
+            WHERE contacts.contactOwner = $userId";
+    return query($sql);
+}
+
 function getDbError() {
     global $db;
     return $db->error;

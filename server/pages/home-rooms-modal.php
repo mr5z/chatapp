@@ -40,27 +40,43 @@
                     <div class="button-group dropdown">
                         <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
                             <span class="glyphicon glyphicon-plus"></span>
+                            <span>Add members</span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-                            <li><a href="#" class="small" data-value="option2" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 2</a></li>
-                            <li><a href="#" class="small" data-value="option3" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 3</a></li>
-                            <li><a href="#" class="small" data-value="option4" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 4</a></li>
-                            <li><a href="#" class="small" data-value="option5" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 5</a></li>
-                            <li><a href="#" class="small" data-value="option6" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 6</a></li>
+<?php
+                            $result = getContactListByUserId($userId);
+                            if ($result) {
+                                if ($result->num_rows > 0) {
+                                    while($row = $result->fetch_object()) {
+?>
+                                        <li>
+                                            <a href="#" class="small" data-contact-id="<?php echo $row->id; ?>" tabIndex="-1"><input type="checkbox"/>
+                                                &nbsp;<?php echo "$row->firstName $row->lastName"; ?>
+                                            </a>
+                                        </li>
+<?php
+                                    }
+                                }
+                                else {
+?>
+                                    <li><a href="#" class="small">No available contacts</a></li>
+<?php
+                                }
+                            }
+                            else {
+                                
+                            }
+?>
                         </ul>
                     </div>
                     <div class="top-7" id="room-members-list">
-                        <h3>
-                            <span>hehe<a href="#">&times;</a></span>
-                        </h3>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" data-dismiss="modal">Create</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" id="create-room">Create</button>
             </div>
         </div>
     </div>

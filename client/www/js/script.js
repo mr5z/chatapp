@@ -6,9 +6,10 @@
 var DOMAIN = 'http://locationbasedapp.esy.es/';
 var MESSAGE_RECEIVING_INTERVAL = 500;
 var NOTIFICATION_RECEIVING_INTERVAL = 2000;
-var DEBUG = true;
-var isChatEngineStopped = DEBUG;
-var isNotificationEngineStopped = DEBUG;
+const DEBUG = true;
+const DESIGNING = true;
+var isChatEngineStopped = !DESIGNING;
+var isNotificationEngineStopped = !DESIGNING;
 var recipientType = '';
 var recipientId = -1;
 var userTypes = {
@@ -470,6 +471,38 @@ $(document).on('click', '.dropdown-menu a', function(event) {
     console.log(options);
     return false;
 });
+
+$(document).on('click', '#create-room', function() {
+    var name = $('input[name=room-name]').val();
+    var password = $('input[name=room-password]').val();
+    var accessibility = $('input[name=room-accessibility]').val();
+    var description = $('input[name=room-description]').val();
+    loadAsync({
+        url: 'api/create-room.php',
+        type: 'post',
+        data: {
+            name: name,
+            password: password,
+            accessibility: accessibility,
+            description: description
+        },
+        success: function(result) {
+            if (result.status == 'success') {
+                insertRoomMembers();
+            }
+            else {
+                
+            }
+        },
+        error: function() {
+            
+        }
+    });
+});
+
+function insertRoomMembers(membersId) {
+    
+}
 
 ///
 /// Utility functions
