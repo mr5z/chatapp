@@ -34,12 +34,7 @@ html, body {
 }
 
 #search-button {
-    position: absolute;
-    right: 16px;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    cursor: pointer;
+    
 }
 
 #notification-bubble {

@@ -2,7 +2,7 @@
 
 header("Access-Control-Allow-Origin: *");
 
-require_once('api/api.php');
+require_once(dirname(__FILE__) . '/../api/api.php');
 
 $userId = post('userId');
 

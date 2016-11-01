@@ -3,11 +3,12 @@
 // var DOMAIN = '';
 // var DOMAIN = 'http://lbchatapp.esy.es/';
 // var DOMAIN = 'http://lbchatapp.hol.es/';
-var DOMAIN = 'http://locationbasedapp.esy.es/';
-var MESSAGE_RECEIVING_INTERVAL = 500;
-var NOTIFICATION_RECEIVING_INTERVAL = 2000;
+// var DOMAIN = 'http://locationbasedapp.esy.es/';
+var DOMAIN = 'http://lbchatapp3.esy.es/';
+var MESSAGE_RECEIVING_INTERVAL = 2000;
+var NOTIFICATION_RECEIVING_INTERVAL = 5000;
 const DEBUG = true;
-const DESIGNING = true;
+const DESIGNING = false;
 var isChatEngineStopped = !DESIGNING;
 var isNotificationEngineStopped = !DESIGNING;
 var recipientType = '';
@@ -85,6 +86,7 @@ $(document).on('click', '#signup', function(e) {
     var age = $('input[name=age]').val();
     loadAsync({
         url: 'api/signup.php',
+        type: 'post',
         data: {
             email: email,
             password: password,
@@ -92,7 +94,6 @@ $(document).on('click', '#signup', function(e) {
             lastName: lastName,
             age: age
         },
-        type: 'post',
         success: function(result) {
             if (result.status == 'success') {
                 onSignUpSuccess(result.message);
@@ -205,13 +206,13 @@ $(document).on('blur', '#input-search', function() {
 function deliverMessage(message) {
     loadAsync({
         url: 'api/message-create.php',
+        type: 'post',
         data: {
             senderId: getUserId(),
             recipientId: recipientId,
             recipientType: recipientType,
             body: message
         },
-        type: 'post',
         success: function(result) {
             if (result.status == 'success') {
                 
@@ -406,7 +407,11 @@ function stopNotificationEngine() {
 function updateUserStatus() {
     loadAsync({
         url: 'api/update-user-status.php',
-        data: { userId: getUserId() },
+        data: {
+            userId: getUserId(),
+            latitude: $('#data-latitude').val(),
+            longitude: $('#data-longitude').val()
+        },
         type: 'post',
         success: function(result) {
             // since it's just an update of user's status
@@ -447,36 +452,47 @@ $(document).on('click', '.add-contacts', function() {
 });
 
 ///
+/// View profile functions
+///
+
+$(document).on('click', '.view-profile', function() {
+    loadContent('pages/view-profile.php', {
+        userId: $(this).attr('data-user-id')
+    });
+});
+
+///
 /// Room functions
 ///
-var options = [];
+var roomMembers = [];
 
 $(document).on('click', '.dropdown-menu a', function(event) {
     var $target = $(event.currentTarget),
-       val = $target.attr('data-value'),
-       $inp = $target.find('input'),
+       value = $target.attr('data-contact-id'),
+       $input = $target.find('input'),
        idx;
 
-    if (( idx = options.indexOf( val )) > -1 ) {
-        options.splice( idx, 1 );
-        setTimeout(function() { $inp.prop( 'checked', false) }, 0);
+    if ((idx = roomMembers.indexOf(value)) > -1) {
+        roomMembers.splice(idx, 1);
+        setTimeout(function() { $input.prop('checked', false) }, 0);
     }
     else {
-        options.push( val );
-        setTimeout(function() { $inp.prop( 'checked', true) }, 0);
+        roomMembers.push(value);
+        setTimeout(function() { $input.prop('checked', true) }, 0);
     }
 
     $(event.target).blur();
       
-    console.log(options);
+    console.log(roomMembers);
     return false;
 });
 
 $(document).on('click', '#create-room', function() {
     var name = $('input[name=room-name]').val();
     var password = $('input[name=room-password]').val();
-    var accessibility = $('input[name=room-accessibility]').val();
-    var description = $('input[name=room-description]').val();
+    var accessibility = $('input[name=room-accessibility]:checked').val();
+    var description = $('textarea[name=room-description]').val();
+    roomMembers.push(getUserId());
     loadAsync({
         url: 'api/create-room.php',
         type: 'post',
@@ -484,24 +500,44 @@ $(document).on('click', '#create-room', function() {
             name: name,
             password: password,
             accessibility: accessibility,
-            description: description
+            description: description,
+            roomMembers: roomMembers.join(','),
+            ownerId: getUserId()
         },
         success: function(result) {
             if (result.status == 'success') {
-                insertRoomMembers();
+                onSuccess();
             }
             else {
-                
+                onError(result.message);
             }
+        },
+        error: function(a, b, c) {
+            onError(c);
+        }
+    });
+    
+    function onSuccess() {
+        reloadMenu('rooms');
+    }
+    
+    function onError(message) {
+        
+    }
+});
+
+function reloadMenu(menuItem) {
+    loadAsync({
+        url: 'pages/home-' + menuItem + '.php',
+        type: 'post',
+        data: { userId: getUserId() },
+        success: function(result) {
+            $('#menu-' + menuItem).html(result);
         },
         error: function() {
             
         }
     });
-});
-
-function insertRoomMembers(membersId) {
-    
 }
 
 ///

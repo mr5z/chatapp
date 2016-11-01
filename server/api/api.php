@@ -45,6 +45,11 @@ function updateUsersStatus() {
     }
 }
 
+function getUserById($userId) {
+    $sql = "SELECT * FROM users WHERE id = $userId";
+    return query($sql);
+}
+
 function getUsersByRoomId($roomId) {
     $sql = "SELECT users.*
             FROM room_members
@@ -82,7 +87,8 @@ function getRoomsByUserId($userId) {
                 INNER JOIN room_members ON users.id = room_members.userId
                 GROUP BY roomId
             ) t1 ON t1.roomID = rooms.id
-            WHERE room_members.userId = $userId";
+            WHERE room_members.userId = $userId
+            ORDER BY rooms.name ASC";
     return query($sql);
 }
 

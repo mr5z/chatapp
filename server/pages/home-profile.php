@@ -5,9 +5,7 @@ require_once('api/api.php');
 
 $userId = post('userId');
 
-$sql = "SELECT firstName, lastName, city FROM users WHERE id = $userId";
-
-$result = query($sql);
+$result = getUserById($userId);
 
 if ($result) {
     $user = $result->fetch_object();

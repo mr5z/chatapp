@@ -6,7 +6,6 @@
 </div>
 <div id="modal-create-room" class="modal fade" role="dialog">
     <div class="modal-dialog">
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -25,14 +24,17 @@
                     <div class="top-7">
                         <h4>Accessibility</h4>
                         <div>
-                            <input type="radio" name="accessibility" id="access-public" />
+                            <input type="radio" name="room-accessibility" id="access-public" value="public" />
                             <label class="label label-default" for="access-public">Public</label>
                         </div>
                         <div>
-                            <input type="radio" name="accessibility" id="access-private" />
+                            <input type="radio" name="room-accessibility" id="access-private" value="private" />
                             <label class="label label-default" for="access-private">Private</label>
-                        </div>
-                            
+                        </div>    
+                    </div>
+                    <div class="top-7">
+                        <h4>Description</h4>
+                        <textarea class="form-control" name="room-description" rows="3" style="resize:none" placeholder="Enter room description here(optional)"></textarea>
                     </div>
                 </div>
                 <hr />
@@ -45,10 +47,10 @@
                         </button>
                         <ul class="dropdown-menu">
 <?php
-                            $result = getContactListByUserId($userId);
-                            if ($result) {
-                                if ($result->num_rows > 0) {
-                                    while($row = $result->fetch_object()) {
+                            $contactList = getContactListByUserId($userId);
+                            if ($contactList) {
+                                if ($contactList->num_rows > 0) {
+                                    while($row = $contactList->fetch_object()) {
 ?>
                                         <li>
                                             <a href="#" class="small" data-contact-id="<?php echo $row->id; ?>" tabIndex="-1"><input type="checkbox"/>

@@ -4,11 +4,13 @@
         <span class="glyphicon glyphicon-triangle-left"></span>
     </button>
 </div>
-<div class="col-xs-6 btn-group text-center">
-    <input class="form-control" id="input-search" type="search" placeholder="Search people/rooms..." />
-    <button class="btn btn-default" id="search-button">
-        <span class="glyphicon glyphicon-search"></span>
-    </button>
+<div class="col-xs-6 btn-group text-center input-group">
+   <input class="form-control" id="input-search" type="search" placeholder="Search people/rooms..." />
+   <span class="input-group-btn">
+        <button class="btn btn-default" id="search-button" type="button">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+   </span>
 </div>
 <div class="col-xs-2 text-center">
     <button id="notification-button" class="btn btn-primary">
