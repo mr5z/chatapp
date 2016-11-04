@@ -58,7 +58,7 @@ function getUserById($userId) {
                           ORDER BY locations.dateGather
                           DESC LIMIT 1), '') position
             FROM users
-            WHERE users.id = 1";
+            WHERE users.id = $userId";
     return query($sql);
 }
 
