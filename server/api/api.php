@@ -46,7 +46,19 @@ function updateUsersStatus() {
 }
 
 function getUserById($userId) {
-    $sql = "SELECT * FROM users WHERE id = $userId";
+    $sql = "SELECT users.*, 
+                COALESCE((SELECT locations.friendlyAddress
+                          FROM locations
+                          WHERE locations.userId = users.id
+                          ORDER BY locations.dateGather
+                          DESC LIMIT 1), 'Unavailable') lastKnownLocation,
+                COALESCE((SELECT CONCAT(locations.latitude, ',', locations.longitude)
+                          FROM locations
+                          WHERE locations.userId = users.id
+                          ORDER BY locations.dateGather
+                          DESC LIMIT 1), '') position
+            FROM users
+            WHERE users.id = 1";
     return query($sql);
 }
 

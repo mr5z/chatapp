@@ -62,7 +62,9 @@ function registerGeolocator() {
               // 'message: ' + error.message + '\n');
     }
     var options = { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true };
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+    setInterval(function() {
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+    }, 10 * 1000);
 }
 
 function registerFileTransfer() {

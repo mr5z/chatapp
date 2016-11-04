@@ -8,13 +8,24 @@ $recipientType 	= post('recipientType');
 
 switch ($recipientType) {
     case 'user':
-        $sql = "SELECT * FROM `messages`
-                WHERE `status` = 'pending'
-                AND `recipientId` = $recipientId
-                AND `recipientType` = '$recipientType'";
+        $sql = "SELECT
+                    messages.id,
+                    messages.senderId,
+                    messages.recipientId,
+                    DATE_FORMAT(messages.dateSent, '%Y-%m-%dT%TZ') dateSent,
+                    messages.body
+                FROM messages
+                WHERE status = 'pending'
+                AND recipientId = $recipientId
+                AND recipientType = '$recipientType'";
         break;
     case 'room':
-        $sql = "SELECT messages.*
+        $sql = "SELECT
+                    messages.id,
+                    messages.senderId,
+                    messages.recipientId,
+                    DATE_FORMAT(messages.dateSent, '%Y-%m-%dT%TZ') dateSent,
+                    messages.body
                 FROM messages
                 LEFT JOIN room_messages
                 ON room_messages.messageId = messages.id

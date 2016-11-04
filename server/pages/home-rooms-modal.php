@@ -45,7 +45,7 @@
                             <span>Add members</span>
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" id="add-members">
 <?php
                             $contactList = getContactListByUserId($userId);
                             if ($contactList) {

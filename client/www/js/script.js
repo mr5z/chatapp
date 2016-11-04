@@ -26,7 +26,7 @@ function showHomePage(user) {
 
 function showLoadingScreen() {
     var loadingScreen = document.createElement('div');
-    var size = $(document).width() / 4 + 'px';
+    var size = Math.min(200, $(document).width()) / 4 + 'px';
     $(loadingScreen).css({
         width: "100%",
         height: "100%",
@@ -405,12 +405,17 @@ function stopNotificationEngine() {
 }
 
 function updateUserStatus() {
+    var position = $('#data-position').val();
+    if (position == '') {
+        position = '12.4123124,121.234234';
+    }
+    position = position.split(',');
     loadAsync({
         url: 'api/update-user-status.php',
         data: {
             userId: getUserId(),
-            latitude: $('#data-latitude').val(),
-            longitude: $('#data-longitude').val()
+            latitude: position[0],
+            longitude: position[1]
         },
         type: 'post',
         success: function(result) {
@@ -466,7 +471,7 @@ $(document).on('click', '.view-profile', function() {
 ///
 var roomMembers = [];
 
-$(document).on('click', '.dropdown-menu a', function(event) {
+$(document).on('click', '#add-members a', function(event) {
     var $target = $(event.currentTarget),
        value = $target.attr('data-contact-id'),
        $input = $target.find('input'),
@@ -539,6 +544,75 @@ function reloadMenu(menuItem) {
         }
     });
 }
+
+///
+/// Map functions
+///
+
+var otherLocation;
+
+function initMap() {
+    
+    var userPos = $('#data-position').val();
+    
+    if (userPos == '') {
+        console.log('no available location');
+        return;
+    }
+    
+    userPos = userPos.split(',');
+    
+    var positionA = new google.maps.LatLng(userPos[0], userPos[1]);
+    var positionB = new google.maps.LatLng(otherLocation[0], otherLocation[1]);
+    var bounds = new google.maps.LatLngBounds();
+    bounds.extend(positionA);
+    bounds.extend(positionB);
+    var map = new google.maps.Map(document.getElementById('map'), {
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        zoom: 10,
+        center: bounds.getCenter()
+    });
+    map.fitBounds(bounds);
+    var markers = [
+        new google.maps.Marker({
+            map: map,
+            position: positionA,
+            label: 'You',
+            icon: genMarker('red')
+        }),
+        new google.maps.Marker({
+            map: map,
+            position: positionB,
+            label: 'Other',
+            icon: genMarker('green')
+        })
+    ];
+    
+    function genMarker(markerColor) {
+        return {
+            path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
+            fillColor: markerColor,
+            fillOpacity: 1,
+            strokeColor: '#000',
+            strokeWeight: 1,
+            scale: 1,
+            labelOrigin: new google.maps.Point(0, 0)
+        };
+    }
+}
+
+$(document).on('click', '.view-map', function(e) {
+    var pos = $(this).attr('data-position');
+    if (pos == '') {
+        return;
+    }
+    otherLocation = pos.split(',');
+    loadContent('pages/map.php', {
+        mapSize: $('#content').width() + 'x' + $('#content').height()
+    });
+});
+
+window.initMap = initMap;
 
 ///
 /// Utility functions
