@@ -44,22 +44,13 @@ var app = {
 
 function registerGeolocator() {
 	var onSuccess = function(position) {
-        $('#data-latitude').val(position.coords.latitude);
-        $('#data-longitude').val(position.coords.longitude);
-        // alert('Latitude: '          + position.coords.latitude          + '\n' +
-              // 'Longitude: '         + position.coords.longitude         + '\n' +
-              // 'Altitude: '          + position.coords.altitude          + '\n' +
-              // 'Accuracy: '          + position.coords.accuracy          + '\n' +
-              // 'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
-              // 'Heading: '           + position.coords.heading           + '\n' +
-              // 'Speed: '             + position.coords.speed             + '\n' +
-              // 'Timestamp: '         + position.timestamp                + '\n');
+        $('#data-position').val(position.coords.latitude + ',' + position.coords.longitude);
     };
 
     // onError Callback receives a PositionError object
     function onError(error) {
-        // alert('code: '    + error.code    + '\n' +
-              // 'message: ' + error.message + '\n');
+        console.log('code: ' + error.code + '\n' +
+                    'message: ' + error.message);
     }
     var options = { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true };
     setInterval(function() {
@@ -80,30 +71,25 @@ function registerFileTransfer() {
 		console.log("upload error target " + error.target);
 	}
 
-	var uri = encodeURI("http://lbchatapp.hol.es");
-
 	var options = new FileUploadOptions();
-	options.fileKey="file";
-	options.fileName=fileURL.substr(fileURL.lastIndexOf('/')+1);
-	options.mimeType="text/plain";
+	options.fileKey = "file";
+	options.fileName = "somefile";
+	options.mimeType = "text/plain";
 
-	var headers={'headerParam':'headerValue'};
+	var headers = { headerParam:'headerValue' };
 
 	options.headers = headers;
 
 	var ft = new FileTransfer();
-	ft.onprogress = function(progressEvent) {
-		if (progressEvent.lengthComputable) {
+	// ft.onprogress = function(progressEvent) {
+		// if (progressEvent.lengthComputable) {
 			// loadingStatus.setPercentage(progressEvent.loaded / progressEvent.total);
-		} else {
+		// } else {
 			// loadingStatus.increment();
-		}
-	};
-	
-	$(document).on('click', '#upload-file', function() {
-		ft.upload(fileURL, uri, win, fail, options);
-	});
-	
+		// }
+	// };
+    
+    window.fileTransfer = ft;
 }
 
 app.initialize();

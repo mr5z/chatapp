@@ -11,7 +11,10 @@ if ($result) {
     $user = $result->fetch_object();
 ?>
     <div class="default-rows padding-19">
-        <h3>Basic Information</h3>
+        <h3>
+            Basic Information
+            <span class="pull-right glyphicon glyphicon-edit" id="edit-profile"></span>
+        </h3>
         <div class="row">
             <div class="col-xs-4">
                 Name:
@@ -31,6 +34,16 @@ if ($result) {
     </div>
     <div class="default-rows padding-19">
         <h3>Contact List</h3>
+        <ul>
+<?php
+            $result = getContactListByUserId($userId);
+            while($row = $result->fetch_object()) {
+?>
+                <li><?php echo $row->firstName; ?></li>
+<?php
+            }
+?>
+        </ul>
     </div>
 <?php
 }

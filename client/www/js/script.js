@@ -36,7 +36,7 @@ function showLoadingScreen() {
         backgroundPosition: "center center",
         backgroundSize: size + ' ' + size
     });
-    $('#content *').replaceWith(loadingScreen);
+    $('#content').html(loadingScreen);
 }
 
 function configCredentials(user) {
@@ -546,12 +546,23 @@ function reloadMenu(menuItem) {
 }
 
 ///
+/// File upload
+///
+
+$(document).on('click', '.upload-file', function() {
+	var uri = encodeURI(DOMAIN + '');
+    window.fileTransfer.upload(fileURL, uri, win, fail, options);
+});
+
+///
 /// Map functions
 ///
 
 var otherLocation;
+var mapContainer, map, markers = [];
+var directionsDisplay;
 
-function initMap() {
+function initMap(width, height) {
     
     var userPos = $('#data-position').val();
     
@@ -562,18 +573,36 @@ function initMap() {
     
     userPos = userPos.split(',');
     
+    mapContainer = mapContainer || document.createElement('div');
+    $('#content').html(mapContainer);
+    
     var positionA = new google.maps.LatLng(userPos[0], userPos[1]);
     var positionB = new google.maps.LatLng(otherLocation[0], otherLocation[1]);
     var bounds = new google.maps.LatLngBounds();
     bounds.extend(positionA);
     bounds.extend(positionB);
-    var map = new google.maps.Map(document.getElementById('map'), {
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        zoom: 10,
-        center: bounds.getCenter()
+    
+    map = map || new google.maps.Map(mapContainer, {
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     });
+    map.setZoom(10);
+    map.setCenter(bounds.getCenter());
     map.fitBounds(bounds);
-    var markers = [
+    
+    $(mapContainer).css({
+        width: $('#content').width() + 'px',
+        height: $('#content').height() + 'px'
+    });
+    
+    var directionsService = new google.maps.DirectionsService();
+    directionsDisplay = directionsDisplay || new google.maps.DirectionsRenderer();
+    directionsDisplay.setMap(null);
+    directionsDisplay.setMap(map);
+    directionsDisplay.setOptions( { suppressMarkers: true } );
+    calculateAndDisplayRoute(directionsService, directionsDisplay, positionA, positionB);
+    
+    clearOverlays();
+    markers = [
         new google.maps.Marker({
             map: map,
             position: positionA,
@@ -587,6 +616,7 @@ function initMap() {
             icon: genMarker('green')
         })
     ];
+    
     
     function genMarker(markerColor) {
         return {
@@ -604,13 +634,43 @@ function initMap() {
 $(document).on('click', '.view-map', function(e) {
     var pos = $(this).attr('data-position');
     if (pos == '') {
+        console.log("other's location cannot determine");
         return;
     }
     otherLocation = pos.split(',');
-    loadContent('pages/map.php', {
-        mapSize: $('#content').width() + 'x' + $('#content').height()
-    });
+    showMap();
 });
+
+function showMap() {
+    if (typeof window.google != 'undefined') {
+        initMap();
+    }
+    else {
+        $.getScript('https://maps.googleapis.com/maps/api/js?callback=initMap');
+    }
+}
+
+function clearOverlays() {
+    for (var i = 0; i < markers.length; i++ ) {
+        markers[i].setMap(null);
+    }
+    markers = [];
+}
+
+function calculateAndDisplayRoute(directionsService, directionsDisplay, origin, destination) {
+    directionsService.route({
+        origin: origin,
+        destination: destination,
+        travelMode: 'DRIVING'
+    },
+    function(response, status) {
+        if (status === 'OK') {
+            directionsDisplay.setDirections(response);
+        } else {
+            window.alert('Directions request failed due to ' + status);
+        }
+    });
+}
 
 window.initMap = initMap;
 
@@ -645,7 +705,7 @@ function abortAllRequests() {
 /// Startup functions
 ///
 
-function loadContent(address, data) {
+function loadContent(address, data, onSuccess, onError) {
     loadAsync({
         url: address,
         data: data,
@@ -655,11 +715,13 @@ function loadContent(address, data) {
         },
         success: function(result) {
             $('#content').html(result);
+            if (onSuccess) onSuccess(result);
         },
         error: function(xhr, ajaxOptions, thrownError) {
             console.log("ajaxOptions: " + ajaxOptions + 
                         ", thrownError: " + thrownError);
             console.log(xhr);
+            if (onError) onError();
         }
     });
 }
