@@ -1,16 +1,13 @@
 <?php header("Access-Control-Allow-Origin: *"); ?>
 <div>
 <?php
-    $sql = "SELECT c.*, CONCAT(u.firstName, ' ', u.lastName) AS contactName, u.age, u.city FROM contacts c
-            LEFT JOIN users u ON u.id = c.contactId
-            WHERE c.contactOwner=$userId";
-    $result = query($sql);
+    $result = getContactListByUserId($userId);
     if ($result) {
         if ($result->num_rows > 0) {
             while($user = $result->fetch_object()) {
 ?>
             <a href="#" class="row default-rows chat padding-19" data-recipient-type="user" data-recipient-id="<?php echo $user->contactId; ?>">
-                <?php echo "$user->contactName, $user->age"; ?>
+                <?php echo "$user->firstName $user->lastName, $user->age"; ?>
                 <div class="extra-detail">
                     <?php echo toTitleCase($user->city); ?>
                 </div>

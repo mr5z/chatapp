@@ -551,7 +551,15 @@ function reloadMenu(menuItem) {
 
 $(document).on('click', '.upload-file', function() {
 	var uri = encodeURI(DOMAIN + '');
-    window.fileTransfer.upload(fileURL, uri, win, fail, options);
+    window.fileTransfer.upload(fileURL, uri, onSuccess, onError, options);
+    
+    function onSuccess() {
+        
+    }
+    
+    function onError() {
+        
+    }
 });
 
 ///
