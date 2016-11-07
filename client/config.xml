@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.nkraft.chatapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>ChatApp</name>
+    <description>
+        A simple location-based chat application
+    </description>
+    <author email="devkram5@gmail.com" href="http://google.com">
+        Nkraft
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="useBrowserHistory" value="false" />
+    <icon src="logo.png" platform="android" width="192" height="208" density="ldpi" />
+    <icon src="logo.png" platform="android" width="192" height="208" density="mdpi" />
+    <icon src="logo.png" platform="android" width="192" height="208" density="hdpi" />
+    <icon src="logo.png" platform="android" width="192" height="208" density="xxhdpi" />
+    <icon src="logo.png" platform="android" width="192" height="208" density="xxxhdpi" />
+</widget>

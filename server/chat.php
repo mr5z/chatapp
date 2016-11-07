@@ -24,7 +24,7 @@ switch ($recipientType) {
                 }
             }
             else {
-                echo "an internal error occurred: getDbError()";
+                echo "an internal error occurred: " . getDbError();
             }
         }
         break;

@@ -6,7 +6,7 @@
         if ($result->num_rows > 0) {
             while($user = $result->fetch_object()) {
 ?>
-            <a href="#" class="row default-rows chat padding-19" data-recipient-type="user" data-recipient-id="<?php echo $user->contactId; ?>">
+            <a href="#" class="row default-rows chat padding-19" data-recipient-type="user" data-recipient-id="<?php echo $user->id; ?>">
                 <?php echo "$user->firstName $user->lastName, $user->age"; ?>
                 <div class="extra-detail">
                     <?php echo toTitleCase($user->city); ?>

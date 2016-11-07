@@ -58,38 +58,4 @@ function registerGeolocator() {
     }, 10 * 1000);
 }
 
-function registerFileTransfer() {
-	function win(r) {
-		console.log("Code = " + r.responseCode);
-		console.log("Response = " + r.response);
-		console.log("Sent = " + r.bytesSent);
-	}
-
-	function fail(error) {
-		alert("An error has occurred: Code = " + error.code);
-		console.log("upload error source " + error.source);
-		console.log("upload error target " + error.target);
-	}
-
-	var options = new FileUploadOptions();
-	options.fileKey = "file";
-	options.fileName = "somefile";
-	options.mimeType = "text/plain";
-
-	var headers = { headerParam:'headerValue' };
-
-	options.headers = headers;
-
-	var ft = new FileTransfer();
-	// ft.onprogress = function(progressEvent) {
-		// if (progressEvent.lengthComputable) {
-			// loadingStatus.setPercentage(progressEvent.loaded / progressEvent.total);
-		// } else {
-			// loadingStatus.increment();
-		// }
-	// };
-    
-    window.fileTransfer = ft;
-}
-
 app.initialize();

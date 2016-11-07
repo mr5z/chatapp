@@ -55,8 +55,14 @@ function loadEngines() {
 /// Navigation functions
 ///
 
+var historyPages = [];
+
 $(document).on('click', '#back-button', function() {
-    // TODO: pop history queue and load it to content
+    if (historyPages.length > 0) {
+        var previous = historyPages.pop();
+        previous.data.fromHistory = true;
+        loadContent(previous.page, previous.data);
+    }
 });
 
 $(document).on('click', '#home', function() {
@@ -176,6 +182,7 @@ $(document).on('click', '#logout', function(e) {
     loadContent('login.php');
     loadHeader('pages/header-blank.php');
     loadFooter('pages/footer-blank.php');
+    historyPages = [];
 });
 
 ///
@@ -290,11 +297,6 @@ function startChatEngine() {
     if (isChatEngineStopped) {
         return;
     }
-    
-    console.log('userId: %d, recipientId: %d, recipientType: %s',
-            getUserId(),
-            getRecipientId(),
-            recipientType);
     
     loadAsync({
         url: 'api/message-broadcaster.php',
@@ -467,6 +469,56 @@ $(document).on('click', '.view-profile', function() {
 });
 
 ///
+/// Edit profile functions
+///
+
+var removeContactList = [];
+
+$(document).on('click', '#edit-profile', function() {
+    loadContent('pages/home-profile-edit.php', {
+        userId: getUserId()
+    });
+});
+
+$(document).on('click', '#cancel-edit-profile', function() {
+    $('#home').click();
+});
+
+$(document).on('click', '#save-edit-profile', function() {
+    var firstName = $('input[name=edit-first-name]').val();
+    var lastName = $('input[name=edit-last-name]').val();
+    var city = $('input[name=edit-city]').val();
+    loadAsync({
+        url: 'api/update-user-info.php',
+        type: 'post',
+        data: {
+            userId: getUserId(),
+            firstName: firstName,
+            lastName: lastName,
+            city: city,
+            removeContactList: removeContactList.join(',')
+        },
+        success: function(result) {
+            if (result.status == 'success') {
+                $('#home').click();
+            }
+            else {
+                
+            }
+        },
+        error: function() {
+            
+        }
+    });
+});
+
+$(document).on('click', '.remove-contact', function() {
+    var contactId = $(this).attr('data-user-id');
+    removeContactList.push(contactId);
+    $(this).parent().remove();
+});
+
+///
 /// Room functions
 ///
 var roomMembers = [];
@@ -551,14 +603,29 @@ function reloadMenu(menuItem) {
 
 $(document).on('click', '.upload-file', function() {
 	var uri = encodeURI(DOMAIN + '');
-    window.fileTransfer.upload(fileURL, uri, onSuccess, onError, options);
+
+	var options = new FileUploadOptions();
+	options.fileKey = "file";
+	options.fileName = "somefile";
+	options.mimeType = "text/plain";
+
+	var headers = { headerParam:'headerValue' };
+
+	options.headers = headers;
     
-    function onSuccess() {
-        
+    var fileTransfer = new FileTransfer();
+    fileTransfer.upload(fileURL, uri, onSuccess, onError, options);
+    
+    function onSuccess(r) {
+        console.log("Code = " + r.responseCode);
+        console.log("Response = " + r.response);
+        console.log("Sent = " + r.bytesSent);
     }
     
-    function onError() {
-        
+    function onError(error) {
+        alert("An error has occurred: Code = " + error.code);
+        console.log("upload error source " + error.source);
+        console.log("upload error target " + error.target);
     }
 });
 
@@ -723,6 +790,12 @@ function loadContent(address, data, onSuccess, onError) {
         },
         success: function(result) {
             $('#content').html(result);
+            if (data && !data.fromHistory) {
+                historyPages.push({
+                    page: address,
+                    data: data
+                });
+            }
             if (onSuccess) onSuccess(result);
         },
         error: function(xhr, ajaxOptions, thrownError) {
