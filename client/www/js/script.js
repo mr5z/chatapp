@@ -614,7 +614,7 @@ $(document).on('click', '.upload-file', function() {
 	options.headers = headers;
     
     var fileTransfer = new FileTransfer();
-    fileTransfer.upload(fileURL, uri, onSuccess, onError, options);
+    fileTransfer.upload("", uri, onSuccess, onError, options);
     
     function onSuccess(r) {
         console.log("Code = " + r.responseCode);
