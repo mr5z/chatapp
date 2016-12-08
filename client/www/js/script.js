@@ -660,12 +660,12 @@ $(document).on('click', '.upload-file', function() {
     
     var platform = device.platform.toLowerCase();
     switch (platform) {
-        'android':
-        showAndroidFileBrowser();
-        break;
-        'ios':
-        showIosFileBrowser();
-        break;
+        case 'android':
+            showAndroidFileBrowser();
+            break;
+        case 'ios':
+            showIosFileBrowser();
+            break;
     }
     
     function showAndroidFileBrowser() {
