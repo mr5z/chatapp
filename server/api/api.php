@@ -112,6 +112,45 @@ function getContactListByUserId($userId) {
     return query($sql);
 }
 
+function uploadFile($file) {
+    $validTypes = array("png", "jpg", "jpeg", "gif");
+    $targetDirectory = "../files/";
+    $maxSize = 500000;
+
+    // Upload cover page
+    if (!isset($file) || empty($file["name"])) {
+        return buildResponse(STATUS_ERROR, "Cannot find file in form: " . $file["error"]);
+    }
+        
+    $targetFile = $targetDirectory . basename($file["name"]);
+    $imageFileType = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    // $valid = getimagesize($file["tmp_name"]);
+
+    // Validation
+    // if(!$valid) {
+        // return buildResponse(STATUS_ERROR, "File is not an image!");
+    // }
+
+    // Check file size
+    if ($file["size"] > $maxSize) {
+        return buildResponse(STATUS_ERROR, "File is too large.");
+    }
+
+    // Disallow certain file formats
+    // if(!in_array($imageFileType, $validTypes)) {
+        // return buildResponse(STATUS_ERROR, "Only jpg, jpeg, png & gif files are allowed");
+    // }
+
+    // Try to upload file
+    $newFilename = round(microtime(true) * 1000) . "." . $imageFileType;
+    if (move_uploaded_file($file["tmp_name"], $targetDirectory.$newFilename)) {
+        return buildResponse(STATUS_SUCCESS, "/files/$newFilename");
+    }
+    else {
+        return buildResponse(STATUS_ERROR, "An error occurred while uploading the file");
+    }
+}
+
 function getDbError() {
     global $db;
     return $db->error;

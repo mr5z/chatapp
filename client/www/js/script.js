@@ -162,6 +162,7 @@ function onLogInSuccess(user) {
     }
     else {
         console.log('your account is online somewhere else');
+        alert('your account is online somewhere else');
     }
 }
 
@@ -210,7 +211,7 @@ $(document).on('blur', '#input-search', function() {
 /// Chat functions
 ///
 
-function deliverMessage(message) {
+function deliverMessage(message, type) {
     loadAsync({
         url: 'api/message-create.php',
         type: 'post',
@@ -218,6 +219,7 @@ function deliverMessage(message) {
             senderId: getUserId(),
             recipientId: recipientId,
             recipientType: recipientType,
+            type: type || 'text',
             body: message
         },
         success: function(result) {
@@ -252,10 +254,21 @@ function popNewDialog(source, message) {
         messageWrapper.className += "pull-left text-left";
         break;
     }
-    // var formattedDate = moment(message.dateSent).format('h:mm:ss A MM/DD/YY');
+    
     var formattedDate = moment(message.dateSent).fromNow();
     var timeStamp = moment(message.dateSent).format('YYYY-MM-DD hh:mm:ss');
-    $(messageBody).append(document.createTextNode(message.body));
+    switch(message.type) {
+    case 'text':
+        $(messageBody).append(document.createTextNode(message.body));
+        break;
+    case 'link':
+        var link = document.createElement('a');
+        $(link).attr('href', message.body);
+        $(link).text('Download attacment');
+        $(link).addClass('download-link');
+        $(messageBody).append(link);
+        break;
+    }
     $(dateSent).append(document.createTextNode(formattedDate));
     $(messageWrapper).append(messageBody);
     $(messageWrapper).append(dateSent);
@@ -271,7 +284,11 @@ function popNewDialog(source, message) {
 $(document).on('click', '#send-message', function() {
     var message = $('#input-message').val();
     deliverMessage(message);
-    popNewDialog(userTypes.user, { body: message, dateSent: new Date().toISOString() });
+    popNewDialog(userTypes.user, {
+        body: message,
+        type: 'text',
+        dateSent: new Date().toISOString()
+    });
 
     if ($('#chat-greetings').length > 0) {
         $('#chat-greetings').remove();
@@ -598,34 +615,112 @@ function reloadMenu(menuItem) {
 }
 
 ///
+/// File download
+///
+
+$(document).on('click', '.download-link', function(e) {
+    e.preventDefault();
+    var link = $(this).attr('href');
+    var filename = link.split('/').pop().split('#')[0].split('?')[0];
+    console.log('Downloading: ' + filename);
+    
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 5 * 1024 * 1024, function(fs) {
+        fs.root.getFile(filename, {
+            create: true,
+            exclusive: false
+        }, onSuccessCreateFile, onErrorCreateFile);
+        
+        function onSuccessCreateFile(fileEntry) {
+            var fileTransfer = new FileTransfer();
+            fileTransfer.download(link, fileEntry.toURL(),
+                function(entry) {
+                    console.log("download complete: " + entry.toURL());
+                },
+                function(error) {
+                    console.log("download error source " + error.source);
+                    console.log("download error target " + error.target);
+                    console.log("download error code" + error.code);
+                },
+                false, {}
+            );
+        }
+        
+        function onErrorCreateFile(message) {
+            console.log(message);
+        }
+    });
+});
+
+///
 /// File upload
 ///
 
 $(document).on('click', '.upload-file', function() {
-	var uri = encodeURI(DOMAIN + '');
-
-	var options = new FileUploadOptions();
-	options.fileKey = "file";
-	options.fileName = "somefile";
-	options.mimeType = "text/plain";
-
-	var headers = { headerParam:'headerValue' };
-
-	options.headers = headers;
+    fileChooser.open(function(fileUri) {
+        onFileSelect(fileUri);
+    }, function(message) {
+        console.log('error: ' + message);
+    });
     
-    var fileTransfer = new FileTransfer();
-    fileTransfer.upload("", uri, onSuccess, onError, options);
-    
-    function onSuccess(r) {
-        console.log("Code = " + r.responseCode);
-        console.log("Response = " + r.response);
-        console.log("Sent = " + r.bytesSent);
+    function uploadFile(fileEntry) {
+        var serverUrl = encodeURI(DOMAIN + 'api/upload-file.php');
+        var options = new FileUploadOptions();
+        
+        options.fileKey = "file";
+        options.fileName = fileEntry.name;
+        options.mimeType = "*/*";
+        options.chunkedMode = false;
+        options.headers = {
+            headerParam: 'headerValue'
+        };
+        
+        console.log('Uploading: ' + fileEntry.toURL());
+        
+        var fileTransfer = new FileTransfer();
+        fileTransfer.upload(fileEntry.toURL(), serverUrl, 
+        function(result) {
+            if (result.responseCode == 200) {
+                console.log('response: ' + result.response);
+                var response = JSON.parse(result.response);
+                if (response.status == 'success') {
+                    onUploadSuccess(response);
+                }
+                else {
+                    onUploadError('Failed to upload: ' + response.message);
+                }
+            }
+            else {
+                onUploadError('Failed to upload');
+            }
+        }
+        , function(error) {
+            onUploadError('An error has occurred: Code = ' + error.code);
+            console.log("upload error source " + error.source);
+            console.log("upload error target " + error.target);
+        }, options);
+        
+        function onUploadSuccess(response) {
+            var links = response.message;
+            for(var i = 0;i < links.length; ++i) {
+                var message = links[i];
+                deliverMessage(message, 'link');
+                popNewDialog(userTypes.user, {
+                    body: message,
+                    type: 'link',
+                    dateSent: new Date().toISOString()
+                });
+            }
+        }
+        
+        function onUploadError(message) {
+            alert(message);
+        }
     }
     
-    function onError(error) {
-        alert("An error has occurred: Code = " + error.code);
-        console.log("upload error source " + error.source);
-        console.log("upload error target " + error.target);
+    function onFileSelect(fileUri) {
+        window.resolveLocalFileSystemURL(fileUri, function(fileEntry) {
+            uploadFile(fileEntry);
+        });
     }
 });
 

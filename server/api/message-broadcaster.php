@@ -13,6 +13,7 @@ switch ($recipientType) {
                     messages.senderId,
                     messages.recipientId,
                     DATE_FORMAT(messages.dateSent, '%Y-%m-%dT%TZ') dateSent,
+                    messages.type,
                     messages.body
                 FROM messages
                 WHERE status = 'pending'
@@ -25,6 +26,7 @@ switch ($recipientType) {
                     messages.senderId,
                     messages.recipientId,
                     DATE_FORMAT(messages.dateSent, '%Y-%m-%dT%TZ') dateSent,
+                    messages.type,
                     messages.body
                 FROM messages
                 LEFT JOIN room_messages

@@ -5,14 +5,15 @@ require_once('api.php');
 $senderId       = post('senderId');
 $recipientId    = post('recipientId');
 $recipientType  = post('recipientType');
+$type           = post('type');
 $body           = post('body');
 
 switch($recipientType) {
     case 'user':
-        $response = createPrivateResponse($senderId, $recipientId, $body);
+        $response = createPrivateResponse($senderId, $recipientId, $type, $body);
         break;
     case 'room':
-        $response = createRoomResponse($senderId, $recipientId, $body);
+        $response = createRoomResponse($senderId, $recipientId, $type, $body);
         break;
     default:
         $response = createErrorResponse($recipientType);
@@ -21,9 +22,9 @@ switch($recipientType) {
 
 printResponse($response);
 
-function createMessage($senderId, $recipientId, $recipientType, $body) {
-    $sql = "INSERT INTO messages(`senderId`, `recipientId`, `recipientType`, `body`, `status`)
-            VALUES($senderId, $recipientId, '$recipientType', '$body', 'pending')";
+function createMessage($senderId, $recipientId, $recipientType, $type, $body) {
+    $sql = "INSERT INTO messages(`senderId`, `recipientId`, `recipientType`, `type`, `body`, `status`)
+            VALUES($senderId, $recipientId, '$recipientType', '$type', '$body', 'pending')";
 
     $result = query($sql);
 
