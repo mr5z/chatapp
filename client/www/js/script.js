@@ -239,19 +239,19 @@ function popNewDialog(source, message) {
     var messageWrapper = document.createElement('div');
     var messageBody = document.createElement('div');
     var dateSent = document.createElement('div');
-    messageRow.className += "row message-row";
-    messageWrapper.className += "col-xs-10 ";
-    dateSent.className += "extra-detail";
+    messageRow.className += 'row message-row';
+    messageWrapper.className += 'col-xs-10 ';
+    dateSent.className += 'extra-detail';
     messageBody.className += source;
 
     var shouldScroll = (content.scrollTop + content.offsetHeight >= content.scrollHeight);
 
     switch(source) {
     case userTypes.user:
-        messageWrapper.className += "pull-right text-right";
+        messageWrapper.className += 'pull-right text-right';
         break;
     case userTypes.other:
-        messageWrapper.className += "pull-left text-left";
+        messageWrapper.className += 'pull-left text-left';
         break;
     }
     
@@ -634,6 +634,7 @@ $(document).on('click', '.download-link', function(e) {
             var fileTransfer = new FileTransfer();
             fileTransfer.download(link, fileEntry.toURL(),
                 function(entry) {
+                    cordova.InAppBrowser.open(entry.toURL(), '_blank', 'location=no');
                     console.log("download complete: " + entry.toURL());
                 },
                 function(error) {
@@ -656,28 +657,48 @@ $(document).on('click', '.download-link', function(e) {
 ///
 
 $(document).on('click', '.upload-file', function() {
-    fileChooser.open(function(fileUri) {
-        onFileSelect(fileUri);
-    }, function(message) {
-        console.log('error: ' + message);
-    });
     
-    function uploadFile(fileEntry) {
-        var serverUrl = encodeURI(DOMAIN + 'api/upload-file.php');
+    var platform = device.platform.toLowerCase();
+    switch (platform) {
+        'android':
+        showAndroidFileBrowser();
+        break;
+        'ios':
+        showIosFileBrowser();
+        break;
+    }
+    
+    function showAndroidFileBrowser() {
+        fileChooser.open(function(fileUri) {
+            onFileSelect(fileUri);
+        }, function(message) {
+            console.log('error: ' + message);
+        });
+    }
+    
+    function showIosFileBrowser() {
+        FilePicker.pickFile(function(path) {
+            var fileName = path.substr(path.lastIndexOf('/') + 1);
+            var fileExtension = path.split('.').pop();
+            uploadFile(fileName, path, fileExtension);
+        }, function(message) {
+            alert('Error opening file: ' + message);
+        });
+    }
+    
+    function uploadFile(fileName, filePath, fileType) {
+        var serverUrl = DOMAIN + 'api/upload-file.php';
         var options = new FileUploadOptions();
         
         options.fileKey = "file";
-        options.fileName = fileEntry.name;
-        options.mimeType = "*/*";
+        options.fileName = fileName;
+        options.mimeType = fileType;
         options.chunkedMode = false;
-        options.headers = {
-            headerParam: 'headerValue'
-        };
         
-        console.log('Uploading: ' + fileEntry.toURL());
+        console.log('Uploading file: { name: ' + fileName + ', type: ' + fileType + ' } from: ' + filePath);
         
         var fileTransfer = new FileTransfer();
-        fileTransfer.upload(fileEntry.toURL(), serverUrl, 
+        fileTransfer.upload(filePath, serverUrl, 
         function(result) {
             if (result.responseCode == 200) {
                 console.log('response: ' + result.response);
@@ -719,7 +740,9 @@ $(document).on('click', '.upload-file', function() {
     
     function onFileSelect(fileUri) {
         window.resolveLocalFileSystemURL(fileUri, function(fileEntry) {
-            uploadFile(fileEntry);
+            fileEntry.file(function(file) {
+               uploadFile(fileEntry.name, fileEntry.toURL(), file.type); 
+            });
         });
     }
 });

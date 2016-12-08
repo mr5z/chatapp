@@ -4,6 +4,7 @@ require_once('api.php');
 
 $messages = array();
 $filePath = array();
+
 foreach($_FILES as $file) {
     $result = uploadFile($file);
     if ($result[RESPONSE_STATUS] != "success") {

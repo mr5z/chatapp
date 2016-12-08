@@ -115,7 +115,7 @@ function getContactListByUserId($userId) {
 function uploadFile($file) {
     $validTypes = array("png", "jpg", "jpeg", "gif");
     $targetDirectory = "../files/";
-    $maxSize = 500000;
+    $maxSize = 25 * 1024 * 1024; // Megabytes
 
     // Upload cover page
     if (!isset($file) || empty($file["name"])) {
@@ -123,7 +123,11 @@ function uploadFile($file) {
     }
         
     $targetFile = $targetDirectory . basename($file["name"]);
-    $imageFileType = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    $fileExtension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    
+    if (empty($fileExtension)) {
+        $fileExtension = mimeToExt($file['type']);
+    }
     // $valid = getimagesize($file["tmp_name"]);
 
     // Validation
@@ -137,12 +141,12 @@ function uploadFile($file) {
     }
 
     // Disallow certain file formats
-    // if(!in_array($imageFileType, $validTypes)) {
+    // if(!in_array($fileExtension, $validTypes)) {
         // return buildResponse(STATUS_ERROR, "Only jpg, jpeg, png & gif files are allowed");
     // }
 
     // Try to upload file
-    $newFilename = round(microtime(true) * 1000) . "." . $imageFileType;
+    $newFilename = round(microtime(true) * 1000) . ".$fileExtension";
     if (move_uploaded_file($file["tmp_name"], $targetDirectory.$newFilename)) {
         return buildResponse(STATUS_SUCCESS, "/files/$newFilename");
     }

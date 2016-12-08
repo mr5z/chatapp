@@ -36,8 +36,8 @@ function createMessage($senderId, $recipientId, $recipientType, $type, $body) {
     }
 }
 
-function createPrivateResponse($senderId, $recipientId, $body) {
-    return createMessage($senderId, $recipientId, 'user', $body);
+function createPrivateResponse($senderId, $recipientId, $type, $body) {
+    return createMessage($senderId, $recipientId, 'user', $type, $body);
 }
 
 function createRoomResponse($senderId, $roomId, $body) {
